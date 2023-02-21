@@ -1,0 +1,7 @@
+megs: 32
+romimage: file="bin/BIOS-bochs-latest"
+vgaromimage: file="bin/VGABIOS-lgpl-latest"
+boot: a
+floppya: type=1_44, 1_44="bin/tinyos.img", status=inserted
+log: bochsout.txt
+mouse: enabled=false
