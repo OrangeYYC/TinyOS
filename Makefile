@@ -46,19 +46,21 @@ build/exception.o : code/kernel/exception.c code/kernel/defs.h code/kernel/commo
 	$(CC) $(CCFLAG) -o $@ $<
 
 # 4 个不同的任务
-build/task1 : build/task1.o
-	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task1.o build/display.o
+build/task1 : build/task1.o build/lib.o
+	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task1.o build/lib.o
 	dd if=build/task1 of=bin/TinyOS.img bs=512 seek=40 count=10 conv=notrunc
-build/task2 : build/task2.o build/display.o
-	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task2.o build/display.o
+build/task2 : build/task2.o build/lib.o
+	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task2.o build/lib.o
 	dd if=build/task2 of=bin/TinyOS.img bs=512 seek=50 count=10 conv=notrunc
-build/task3 : build/task3.o build/display.o
-	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task3.o build/display.o
+build/task3 : build/task3.o build/lib.o
+	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task3.o build/lib.o
 	dd if=build/task3 of=bin/TinyOS.img bs=512 seek=60 count=10 conv=notrunc
-build/task4 : build/task4.o build/display.o
-	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task4.o build/display.o
+build/task4 : build/task4.o build/lib.o
+	$(LD) $(LDFLAG) $(TASK_LD) -o $@ build/task4.o build/lib.o
 	dd if=build/task4 of=bin/TinyOS.img bs=512 seek=70 count=10 conv=notrunc
 
+build/lib.o : code/tasks/lib.c code/tasks/lib.h
+	$(CC) $(CCFLAG) -o $@ $<
 build/task1.o : code/tasks/task1.c code/kernel/defs.h
 	$(CC) $(CCFLAG) -o $@ $<
 build/task2.o : code/tasks/task2.c code/kernel/defs.h
