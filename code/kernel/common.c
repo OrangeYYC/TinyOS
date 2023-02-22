@@ -1,4 +1,19 @@
+//  common.c         by OrangeYYC
+//  TinyOS 全局共享的函数与变量的定义
+
 #include "defs.h"
+
+/* ========================== 全局共享变量 ========================== */
+u32         RAMSize            = 0;    // 系统内存大小
+u32         MemoryEntryCount   = 0;    // 描述符数量
+ARD         ARDs[10]           = {};   // 描述符结构体
+u8          gdtPtr[6]          = {};   // 全局描述符表指针
+Descriptor  gdt[GDT_SIZE]      = {};   // 全局描述符表
+u8          idtPtr[6]          = {};   // 中断向量表指针
+Gate        idt[IDT_SIZE]      = {};   // 中断向量表
+PCB         process[MAX_TASKS] = {};   // 进程表
+TSS         tss                = {};   // 任务状态段
+u32         readyPid           = -1;   // 就绪 pid
 
 /* ========================== 信息显示函数 ========================== */
 int dispX = 0;                                  // 当前光标所在行

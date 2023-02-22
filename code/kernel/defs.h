@@ -1,25 +1,42 @@
+//  defs.h         by OrangeYYC
+//  TinyOS 使用的重要参数、常量和类型定义
+
 #ifndef	_DEFS_H_
 #define	_DEFS_H_
 
 /* ========================== 重要参数定义 ========================== */
 // 最大进程数量 受制于页表数量 可以最多容纳 8 进程
-#define MAX_TASKS 		 8
+#define MAX_TASKS 		 		8
 // 进程的局部描述符大小
-#define LDT_SIZE 		 2
+#define LDT_SIZE 		 		2
 // 全局描述符表大小
-#define GDT_SIZE 		 (6 + MAX_TASKS)
+#define GDT_SIZE 		 		(6+MAX_TASKS)
 // 中断向量表大小
-#define IDT_SIZE 		 256
+#define IDT_SIZE 		 		256
 // 内核加载的偏移地址
-#define KERNEL_BASE 	 0x8000
+#define KERNEL_BASE 	 		0x8000
 // 内核程序页目录基地址
-#define PAGE_DIR_BASE    0x010000
+#define PAGE_DIR_BASE    		0x010000
 // 内核程序页表基地址
-#define PAGE_TABLE_BASE  0x011000
+#define PAGE_TABLE_BASE  		0x011000
 // 软盘中进程的开始扇区
-#define PROCESS_START_SECTOR 40
+#define PROCESS_START_SECTOR 	40
 // 软盘中进程的占用扇区数目
-#define PROCESS_TOTAL_SECTOR 10
+#define PROCESS_TOTAL_SECTOR 	10
+// 作为装入缓存的物理地址
+#define PROCESS_LOAD_BUFFER  	0x180000
+// 用户进程占用物理内存大小
+#define PROCESS_PSIZE			0x10000
+// 用户进程占物理内存的起始位置
+#define PROCESS_PSTART			0x100000
+// 用户进程页目录起始地址
+#define PROCESS_PDE_START		0x20000
+// 用户进程页表起始地址
+#define PROCESS_PTE_START   	0x21000
+// 用户进程页表大小
+#define PROCESS_PTE_SIZE		0x10000
+// 硬盘扇区大小
+#define DISK_SECTOR_SIZE 		0x200
 
 /* ========================== 类型定义 ========================== */
 typedef unsigned int    u32;
@@ -53,7 +70,7 @@ typedef struct s_ard {
 	u32		LengthLow;
 	u32		LengthHigh;
 	u32		Type;
-} AddressRangeDescriptor;
+} ARD;
 
 // 进程栈帧结构 用于在进程切换的过程中保存寄存器环境
 typedef struct s_stackFrame {
@@ -85,7 +102,7 @@ typedef struct s_pcb {
 	u32			tick;				// 进程的等待执行计数
 	u32			priority;			// 进程优先级
 	u32 		pageDirBase;		// 进程页目录的地址
-} ProcessControlBlock;
+} PCB;
 
 // 任务状态段结构 用于在优先级转换的过程中重置信息
 typedef struct s_tss {
@@ -117,14 +134,6 @@ typedef struct s_tss {
 	u16	trap;
 	u16	iobase;
 } TSS;
-
-// 任务描述结构 用来方便进程的初始化和任务的创建
-typedef struct s_task {
-	void (*eip)();		// 任务主函数地址
-	int	stackBase;		// 任务栈基地址
-	int stackSize;		// 任务栈大小
-	int priority;		// 任务优先级
-} Task;
 
 /* ========================== 常量定义 ========================== */
 // 全局描述符表中的表项序号
@@ -214,7 +223,6 @@ typedef struct s_task {
 #define INT_VECTOR_IRQ8 0x28        // 从中断处理器中断向量号
 
 // 异常定义
-/* 中断向量 */
 #define	INT_VECTOR_DIVIDE		0x0
 #define	INT_VECTOR_DEBUG		0x1
 #define	INT_VECTOR_NMI			0x2

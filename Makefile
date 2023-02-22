@@ -10,7 +10,7 @@ LDFLAG      = -s -m elf_i386 --nmagic --script
 BOOT_LD     = code/boot/boot.ld
 KERNEL_LD   = code/kernel/kernel.ld
 TASK_LD     = code/tasks/task.ld
-KERNEL_OBJS = build/kernel16.o build/kernel32.o build/kernelData.o build/process.o build/common.o build/exception.o
+KERNEL_OBJS = build/kernel16.o build/kernel32.o build/process.o build/common.o build/exception.o
 
 .PHONY : everything all write writeboot writekernel start tasks
 
@@ -34,8 +34,6 @@ build/boot.bin : code/boot/boot.c
 build/kernel.bin : $(KERNEL_OBJS)
 	$(LD) $(LDFLAG) $(KERNEL_LD) -o $@ $(KERNEL_OBJS)
 	dd if=build/kernel.bin of=bin/TinyOS.img bs=512 seek=1 count=32 conv=notrunc
-build/kernelData.o : code/kernel/data.c code/kernel/defs.h
-	$(CC) $(CCFLAG) -o $@ $<
 build/kernel16.o : code/kernel/kernel16.c code/kernel/defs.h 
 	$(CC) $(CCFLAG) -o $@ $<
 build/kernel32.o : code/kernel/kernel32.c code/kernel/defs.h

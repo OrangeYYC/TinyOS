@@ -1,3 +1,6 @@
+//  kernel32.c         by OrangeYYC
+//  TinyOS 保护模式 32 位内核程序部分
+
 /* TinyOS 内核 —— 保护模式执行程序
 内存空间: 0x200000 4M 内存空间
     0x000000 -> 0x000400  BIOS 加载的中断向量表
@@ -28,13 +31,8 @@
 */
 
 #include "common.h"
-#include "elf.h"
 
 /* ========================== 显示系统内存 ========================== */
-extern u32                    RAMSize          ;
-extern u32                    MemoryEntryCount ;
-extern AddressRangeDescriptor ARDs[10]         ;
-
 // 显示系统内存函数
 static void CheckMemory() {
     Print("[KERNEL] Testing System Memory\n", F_Cyan | L_Light);
@@ -82,9 +80,6 @@ static void SetupPaging() {
 }
 
 /* ========================== 装载TSS函数 ========================== */
-extern TSS tss;     // TSS 结构体
-extern Descriptor          gdt[GDT_SIZE];           // 全局描述符表
-
 static void SetupTSS() {
     // TSS 所有的元素设置为 0
     for (int i = 0; i < sizeof(TSS); i++)
@@ -98,12 +93,14 @@ static void SetupTSS() {
     );
 }
 
+/* ========================== 内核主函数 ========================== */
+// 导入重要功能
 extern void SetupIdt();
 extern void SetupProcess();
 extern void restart();
 extern void choose();
 
-/* ========================== 内核主函数 ========================== */
+// 内核主功能函数
 void Kernel32Main() {
     // 初始化寄存器
     __asm__ __volatile__ (
@@ -123,7 +120,7 @@ void Kernel32Main() {
     CheckMemory(); 
     // 开启分页机制                     
     SetupPaging();
-    // 建立中断向量表
+    // 初始化 8259A 并建立中断向量表
     SetupIdt();
     // 设置 TSS
     SetupTSS();

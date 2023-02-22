@@ -1,3 +1,6 @@
+//  kernel16.c         by OrangeYYC
+//  TinyOS 实模式 16 位内核程序部分
+
 /* TinyOS 内核 —— 实模式执行程序
 内存空间: 0x200000 4M 内存空间
     0x000000 -> 0x000400  BIOS 加载的中断向量表
@@ -42,8 +45,8 @@ static void Kernel16Main() {
 }
 
 /* ========================== 检查系统内存 ========================== */
-extern u32                    MemoryEntryCount;    // 描述符数量
-extern AddressRangeDescriptor ARDs[10];            // 描述符结构体
+extern u32 MemoryEntryCount;    // 描述符数量
+extern ARD ARDs[10];            // 描述符结构体
 
 // 检查内存函数
 static void CheckMemory() {

@@ -1,4 +1,4 @@
-//  exception.h         by OrangeYYC
+//  exception.c         by OrangeYYC
 //  TinyOS 中断处理的相关功能在本文件中实现
 
 #include "common.h"
