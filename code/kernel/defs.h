@@ -2,24 +2,24 @@
 #define	_DEFS_H_
 
 /* ========================== 重要参数定义 ========================== */
-// 最大进程数量
-#define MAX_TASKS 		 10
+// 最大进程数量 受制于页表数量 可以最多容纳 8 进程
+#define MAX_TASKS 		 8
 // 进程的局部描述符大小
 #define LDT_SIZE 		 2
 // 全局描述符表大小
-#define GDT_SIZE 		 5 + MAX_TASKS
+#define GDT_SIZE 		 (6 + MAX_TASKS)
 // 中断向量表大小
 #define IDT_SIZE 		 256
 // 内核加载的偏移地址
-#define KERNEL_BASE 	 0x90000
-// 页目录虚拟基地址
-#define PAGE_DIR_BASE    0x70000
-// 页表虚拟基地址
-#define PAGE_TABLE_BASE  0x71000
-// 页目录物理基地址
-#define PAGE_DIR_PBASE   PAGE_DIR_BASE + KERNEL_BASE
-// 页表物理基地址
-#define PAGE_TABLE_PBASE PAGE_TABLE_BASE + KERNEL_BASE
+#define KERNEL_BASE 	 0x8000
+// 内核程序页目录基地址
+#define PAGE_DIR_BASE    0x010000
+// 内核程序页表基地址
+#define PAGE_TABLE_BASE  0x011000
+// 软盘中进程的开始扇区
+#define PROCESS_START_SECTOR 40
+// 软盘中进程的占用扇区数目
+#define PROCESS_TOTAL_SECTOR 10
 
 /* ========================== 类型定义 ========================== */
 typedef unsigned int    u32;
@@ -84,6 +84,7 @@ typedef struct s_pcb {
 	u32			pid;				// 进程编号
 	u32			tick;				// 进程的等待执行计数
 	u32			priority;			// 进程优先级
+	u32 		pageDirBase;		// 进程页目录的地址
 } ProcessControlBlock;
 
 // 任务状态段结构 用于在优先级转换的过程中重置信息
@@ -138,13 +139,13 @@ typedef struct s_task {
 #define	SELECTOR_FLAT_RW	0x10
 // 3: 用户级显存段 DPL3
 #define	INDEX_VIDEO		    3
-#define	SELECTOR_VIDEO		0x18 + 3
+#define	SELECTOR_VIDEO		(0x18 + 3)
 // 4: 内核级任务状态段 DPL0 
 #define INDEX_TSS			4
 #define SELECTOR_TSS		0x20
 // >=5: 用户级进程的局部描述符表选择子 DPL3
 #define INDEX_LDT_FIRST		5
-#define SELECTOR_LDT_FIRST  0x28 + 3
+#define SELECTOR_LDT_FIRST  (0x28 + 3)
 
 // 全局描述符属性定义
 #define	DA_32			0x4000
@@ -178,24 +179,24 @@ typedef struct s_task {
 
 // 显存输出的前景颜色和背景颜色定义
 #define F_Black			0
-#define F_Blue			1 << 8
-#define F_Green			2 << 8
-#define	F_Cyan			3 << 8
-#define F_Red			4 << 8
-#define F_Pink			5 << 8
-#define	F_Brown			6 << 8
-#define	F_White			7 << 8
+#define F_Blue			(1 << 8)
+#define F_Green			(2 << 8)
+#define	F_Cyan			(3 << 8)
+#define F_Red			(4 << 8)
+#define F_Pink			(5 << 8)
+#define	F_Brown			(6 << 8)
+#define	F_White			(7 << 8)
 #define B_Black			0
-#define B_Blue			1 << 12
-#define B_Green			2 << 12
-#define	B_Cyan			3 << 12
-#define B_Red			4 << 12
-#define B_Pink			5 << 12
-#define	B_Brown			6 << 12
-#define	B_White			7 << 12
-#define L_Light			1 << 11
+#define B_Blue			(1 << 12)
+#define B_Green			(2 << 12)
+#define	B_Cyan			(3 << 12)
+#define B_Red			(4 << 12)
+#define B_Pink			(5 << 12)
+#define	B_Brown			(6 << 12)
+#define	B_White			(7 << 12)
+#define L_Light			(1 << 11)
 #define L_Dark			0
-#define Flicker			1 << 15
+#define Flicker			(1 << 15)
 
 // 页表属性定义
 #define PAGE_P           1
@@ -211,5 +212,24 @@ typedef struct s_task {
 #define INT_S_CTLMASK   0xa1        // 从中断控制器掩码端口
 #define INT_VECTOR_IRQ0 0x20        // 主中断处理器中断向量号
 #define INT_VECTOR_IRQ8 0x28        // 从中断处理器中断向量号
+
+// 异常定义
+/* 中断向量 */
+#define	INT_VECTOR_DIVIDE		0x0
+#define	INT_VECTOR_DEBUG		0x1
+#define	INT_VECTOR_NMI			0x2
+#define	INT_VECTOR_BREAKPOINT	0x3
+#define	INT_VECTOR_OVERFLOW		0x4
+#define	INT_VECTOR_BOUNDS		0x5
+#define	INT_VECTOR_INVAL_OP		0x6
+#define	INT_VECTOR_COPROC_NOT	0x7
+#define	INT_VECTOR_DOUBLE_FAULT	0x8
+#define	INT_VECTOR_COPROC_SEG	0x9
+#define	INT_VECTOR_INVAL_TSS	0xA
+#define	INT_VECTOR_SEG_NOT		0xB
+#define	INT_VECTOR_STACK_FAULT	0xC
+#define	INT_VECTOR_PROTECTION	0xD
+#define	INT_VECTOR_PAGE_FAULT	0xE
+#define	INT_VECTOR_COPROC_ERR	0x10
 
 #endif

@@ -4,23 +4,24 @@
     0x000400 -> 0x000500  BIOS 参数的相关区域
     0x000500 -> 0x007c00  TinyOS 引导程序的栈空间
     0x007c00 -> 0x007e00  TinyOS 引导程序代码段和数据段
-    0x007e00 -> 0x090000  空闲空间
-    0x090000 -> 0x09e000  TinyOS 内核程序代码段和数据段
-    0x09e000 -> 0x09efff  TinyOS 内核的栈空间
-    0x100000 -> 0x1FFFFF  空闲空间
+    0x007e00 -> 0x090000  空闲空间(计划分给内核)
+        0x007e00 -> 0x007fff 内核程序的栈空间
+        0x008000 -> 0x00Bfff 内核程序的代码与数据
+        0x00C000 -> 0x09efff 内核暂时保留不用
+    0x100000 -> 0x1FFFFF  空间空间(计划划分给用户)
 运行模式: 16 位实模式
-段寄存器: CS = DS = ES = SS = 0x9000
+段寄存器: CS = DS = ES = SS = 0
 功能：设置全局描述符表，并跳入保护模式
 */
 
 /* ========================== 初始化代码段 ========================== */
 asm (
     ".code16gcc\n"
-    "movw   %cs, %ax\n"         // 设置 cs = ds = es = ss = 0x9000
+    "movw   %cs, %ax\n"         // 设置 cs = ds = es = ss = 0
     "movw   %ax, %ds\n"
     "movw   %ax, %es\n"
     "movw   %ax, %ss\n"
-    "movw   $0xefff, %sp\n"     // 设置 sp = 0x9000:0xefff 向低地址处增长
+    "movw   $0x7fff, %sp\n"     // 设置 sp = 0:0xefff 向低地址处增长
     "call   Kernel16Main\n"     // 调用内核主函数
 );
 
@@ -79,15 +80,15 @@ static void SetGdtEntry(Descriptor *des, u32 base, u32 limit, u16 attr) {
 static void SetGdt() {
     SetGdtEntry(&gdt[INDEX_DUMMY], 0, 0, 0);
     // flat 代码段 DPL0 (内核级)
-    SetGdtEntry(&gdt[INDEX_FLAT_C], 0x90000, 0xfffff, DA_CR + DA_32 + DA_LIMIT_4K);
+    SetGdtEntry(&gdt[INDEX_FLAT_C], 0x0, 0x1fff, DA_CR + DA_32 + DA_LIMIT_4K);
     // flat 数据段 DPL0 (内核级)
-    SetGdtEntry(&gdt[INDEX_FLAT_RW], 0x90000, 0xfffff, DA_DRW + DA_32 + DA_LIMIT_4K);
+    SetGdtEntry(&gdt[INDEX_FLAT_RW], 0x0, 0x1fff, DA_DRW + DA_32 + DA_LIMIT_4K);
     // 显存段 DPL3 (用户级)
     SetGdtEntry(&gdt[INDEX_VIDEO], 0xb8000, 0xffff, DA_DRW + DA_DPL3);
     u16* pGdtLimit = (u16*)(&gdtPtr[0]);
 	u32* pGdtBase  = (u32*)(&gdtPtr[2]);
 	*pGdtLimit = GDT_SIZE * sizeof(Descriptor) - 1;
-	*pGdtBase  = (u32)(&gdt) + 0x90000;
+	*pGdtBase  = (u32)(&gdt);
 }
 
 /* ========================== 转到保护模式 ========================== */
